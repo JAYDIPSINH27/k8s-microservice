@@ -1,0 +1,29 @@
+steps:
+  # Step to build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/csci-5409-term-project/k8s/k8s-service2', '.']
+
+  # Step to push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/csci-5409-term-project/k8s/k8s-service2']
+
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'delete'
+      - 'pod'
+      - '-l'
+      - 'app=k8s-service2'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+  # Step to apply the Kubernetes deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'deployment.yaml'
+    env:  
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+options:
+  logging: CLOUD_LOGGING_ONLY
